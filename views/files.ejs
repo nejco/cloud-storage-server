@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1>Hi, <%= username %></h1>
+    <p>Listing files at <%= path %></p>
+
+    <table>
+      <th>
+      <tr>
+        <td>Name</td>
+        <td>Created</td>
+        <td>Size</td>
+        <td>isFile</td>
+        <td>isDir</td>
+
+      </tr>
+      </th>
+      <% files.forEach(function(file) { %>
+
+        <% if (file.details.isFile) { %>
+
+          <tr style="font-weight: bold">
+            <td><a href="/files/get?path=<%= file.path %>"><%= file.name %></a></td>
+            <td><%= new Date(file.details.birthtime) %> </td>
+            <td><%= file.details.size %></td>
+            <td><%= file.details.isFile %></td>
+            <td><%= file.details.isDirectory %></td>
+
+            <td>
+              <form action='files/delete'
+                    method='post'>
+
+                <input type="hidden" value="<%= file.name %>" name="name">
+                <input type="hidden" value="<%= path %>" name="path">
+
+                <input type='submit' value='delete' />
+              </form>
+
+            </td>
+          </tr>
+        <% } %>
+
+          <% if (file.details.isDirectory) { %>
+
+            <tr>
+              <td><a href="/files?path=<%= file.path %>"><%= file.name %></a></td>
+              <td><%= new Date(file.details.birthtime) %> </td>
+              <td><%= file.details.size %></td>
+              <td><%= file.details.isFile %></td>
+              <td><%= file.details.isDirectory %></td>
+
+          <td>
+            <form action='directory/delete'
+                  method='post'>
+
+              <input type="hidden" value="<%= file.name %>" name="name">
+              <input type="hidden" value="<%= path %>" name="path">
+
+              <input type='submit' value='delete' />
+            </form>
+
+          </td>
+        </tr>
+          <% } %>
+
+
+
+
+
+      <% }); %>
+    </table>
+
+
+  <h1>New folder</h1>
+  <form method="post" action="directory/new">
+    folder name <input type="text" name="foldername" />
+    <input type="hidden" value="<%= path %>" name="path">
+
+    <input type="submit">
+  </form>
+
+    <h1>Upload a file</h1>
+
+    <form ref='uploadForm'
+          id='uploadForm'
+          action='files/upload'
+          method='post'
+          encType="multipart/form-data">
+
+      <input type="hidden" value="<%= path %>" name="path">
+
+      <input type="file" name="sampleFile" multiple />
+      <input type='submit' value='Upload!' />
+    </form>
+
+  </body>
+</html>

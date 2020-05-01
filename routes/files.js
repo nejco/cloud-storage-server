@@ -1,0 +1,116 @@
+var express = require('express');
+var router = express.Router();
+const fs = require('fs');
+const path = require('path');
+const fsUtils = require('../utils/FsUtils');
+
+/* GET home page. */
+router.get('/', function(req, res, next) {
+
+  console.log(req.query);
+  const token = JSON.parse(req.cookies.jwtToken).token;
+  console.log('token', token);
+
+
+  const absolutePath = req.query.path;
+  const validationResult = fsUtils.validateUserForPath(absolutePath, token);
+
+  const fullPath = validationResult.path ;
+  const username = validationResult.username;
+
+  fs.readdir(fullPath, (err, files) => {
+
+    const detailedFiles = files.filter(name => !name.startsWith('.')).map(file => {
+      const lstatFile = fsUtils.validateUserForPath(path.join(absolutePath, file), token).path
+
+      const stat = fs.lstatSync(lstatFile);
+      return {
+        name: file,
+        path: path.join(absolutePath, file),
+        details: {
+          isFile: stat.isFile(),
+          isDirectory: stat.isDirectory(),
+          size: stat.size,
+          birthtime: stat.birthtimeMs
+        }
+      }
+    });
+
+    res.render('files', { title: 'Files viewer' , path: absolutePath, files: detailedFiles, username});
+
+  })
+
+});
+
+
+
+router.post('/upload', function(req, res, next) {
+
+  console.log("Uploaded file ", req.files);
+
+  let sampleFile = req.files.sampleFile;
+  const token = JSON.parse(req.cookies.jwtToken).token;
+  const absolutePath = fsUtils.validateUserForPath(req.body.path, token).path;
+
+
+  req.files.sampleFile.map(file => {
+    if(file.name.includes('..')) {
+      throw new Error(`Invalid file name ${file.name}`);
+    }
+
+    const fullPath = path.join(absolutePath, file.name);
+    console.log("fullPath", fullPath);
+
+    file.mv(fullPath, function(err) {
+      if (err)
+        return res.status(500).send(err);
+    });
+
+  });
+
+  res.redirect(`/files?path=${req.body.path}`);
+
+
+  // if(sampleFile.name.includes('..')) {
+  //   throw new Error(`Invalid file name ${sampleFile.name}`);
+  // }
+
+  // const fullPath = path.join(absolutePath, sampleFile.name);
+  //
+  // console.log("fullPath", fullPath);
+
+  // Use the mv() method to place the file somewhere on your server
+  // sampleFile.mv(fullPath, function(err) {
+  //   if (err)
+  //     return res.status(500).send(err);
+  //
+  //   res.redirect(`/files?path=${req.body.path}`);
+  // });
+
+});
+
+
+router.get('/get', function(req, res, next) {
+
+  const token = JSON.parse(req.cookies.jwtToken).token;
+  const absolutePath = req.query.path;
+
+  res.sendFile(fsUtils.validateUserForPath(absolutePath, token).path);
+
+})
+
+router.post('/delete', function(req, res, next) {
+
+  const token = JSON.parse(req.cookies.jwtToken).token;
+  const absolutePath = path.join(req.body.path, req.body.name);
+
+  const filePath = fsUtils.validateUserForPath(absolutePath, token).path;
+
+
+  console.log("Removing file", filePath);
+  fs.unlinkSync(filePath);
+  res.redirect(`/files?path=${req.body.path}`);
+});
+
+
+module.exports = router;
