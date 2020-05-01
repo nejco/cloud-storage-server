@@ -3,31 +3,50 @@
   <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel='stylesheet' href='/css/bootstrap.css' />
+    <script src="/javascripts/jquery-3.5.0.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+
+
   </head>
   <body>
     <h1>Hi, <%= username %></h1>
     <p>Listing files at <%= path %></p>
 
-    <a href="/files?path=<%= path %>/..">../</a>
+    <a href="/files?path=<%= path %>/..">../</a><br/>
 
 
-    <table>
-      <th>
+    <table class="table table-striped">
       <tr>
-        <td>Name</td>
-        <td>Created</td>
-        <td>Size</td>
-        <td>isFile</td>
-        <td>isDir</td>
+        <th>Name</th>
+        <th>Preview</th>
+        <th>Created</th>
+        <th>Size</th>
+        <th>Is file?</th>
+        <th>Is dir?</th>
+        <th>Delete</th>
 
       </tr>
-      </th>
+
       <% files.forEach(function(file) { %>
 
         <% if (file.details.isFile) { %>
 
           <tr style="font-weight: bold">
             <td><a href="/files/get?path=<%= file.path %>"><%= file.name %></a></td>
+
+            <td>
+              <% if (file.path.toLowerCase().endsWith('jpg') ||
+                      file.path.toLowerCase().endsWith('jpeg') ||
+                      file.path.toLowerCase().endsWith('png')) { %>
+
+              <img src="/files/get/preview?path=<%= file.path %>" class="img-responsive" alt="Responsive image">
+
+              <% } %>
+
+            </td>
+
+<!--              <a href="/files/get/preview?path=<%= file.path %>"><%= file.name %></a></td>-->
             <td><%= new Date(file.details.birthtime) %> </td>
             <td><%= file.details.size %></td>
             <td><%= file.details.isFile %></td>
@@ -40,7 +59,7 @@
                 <input type="hidden" value="<%= file.name %>" name="name">
                 <input type="hidden" value="<%= path %>" name="path">
 
-                <input type='submit' value='delete' />
+                <input type='submit' value='delete' class="btn btn-danger"/>
               </form>
 
             </td>
@@ -51,6 +70,7 @@
 
             <tr>
               <td><a href="/files?path=<%= file.path %>"><%= file.name %></a></td>
+              <td></td>
               <td><%= new Date(file.details.birthtime) %> </td>
               <td><%= file.details.size %></td>
               <td><%= file.details.isFile %></td>
@@ -63,7 +83,7 @@
               <input type="hidden" value="<%= file.name %>" name="name">
               <input type="hidden" value="<%= path %>" name="path">
 
-              <input type='submit' value='delete' />
+              <input type='submit' value='delete' class="btn btn-danger"/>
             </form>
 
           </td>
@@ -80,10 +100,10 @@
 
   <h1>New folder</h1>
   <form method="post" action="directory/new">
-    folder name <input type="text" name="foldername" />
+    New folder name <input type="text" name="foldername" />
     <input type="hidden" value="<%= path %>" name="path">
 
-    <input type="submit">
+    <input type="submit" class="btn btn-success">
   </form>
 
     <h1>Upload a file</h1>
@@ -97,7 +117,7 @@
       <input type="hidden" value="<%= path %>" name="path">
 
       <input type="file" name="sampleFile" multiple />
-      <input type='submit' value='Upload!' />
+      <input type="submit" value="Upload!" class="btn btn-success" />
     </form>
 
   </body>

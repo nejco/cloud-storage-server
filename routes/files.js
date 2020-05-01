@@ -3,6 +3,8 @@ var router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const fsUtils = require('../utils/FsUtils');
+const sharp = require('sharp');
+
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -77,7 +79,26 @@ router.get('/get', function(req, res, next) {
   const token = JSON.parse(req.cookies.jwtToken).token;
   const absolutePath = req.query.path;
 
-  res.sendFile(fsUtils.validateUserForPath(absolutePath, token).path);
+  const filePath = fsUtils.validateUserForPath(absolutePath, token).path;
+
+  res.sendFile(filePath);
+
+});
+
+router.get('/get/preview', function(req, res, next) {
+
+  const token = JSON.parse(req.cookies.jwtToken).token;
+  const absolutePath = req.query.path;
+
+  const filePath = fsUtils.validateUserForPath(absolutePath, token).path;
+
+  sharp(filePath).resize(500).toBuffer().then(buff => {
+
+    res.end(buff, 'base64');
+
+  }).catch(error => {
+    res.json({error: error.toString()})
+  })
 
 });
 
