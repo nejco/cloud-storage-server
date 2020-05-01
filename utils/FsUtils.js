@@ -19,7 +19,6 @@ function stripPath(relativePath, username) {
     }
 
 }
-// module.exports.stripPath = stripPath;
 
 module.exports.validateUserForPath = (relativePath, jwtToken) => {
 

@@ -21,7 +21,7 @@ router.get('/', function(req, res, next) {
   fs.readdir(fullPath, (err, files) => {
 
     const detailedFiles = files.filter(name => !name.startsWith('.')).map(file => {
-      const lstatFile = fsUtils.validateUserForPath(path.join(absolutePath, file), token).path
+      const lstatFile = fsUtils.validateUserForPath(path.join(absolutePath, file), token).path;
 
       const stat = fs.lstatSync(lstatFile);
       return {
@@ -48,7 +48,6 @@ router.post('/upload', function(req, res, next) {
 
   console.log("Uploaded file ", req.files);
 
-  let sampleFile = req.files.sampleFile;
   const token = JSON.parse(req.cookies.jwtToken).token;
   const absolutePath = fsUtils.validateUserForPath(req.body.path, token).path;
 
@@ -70,23 +69,6 @@ router.post('/upload', function(req, res, next) {
 
   res.redirect(`/files?path=${req.body.path}`);
 
-
-  // if(sampleFile.name.includes('..')) {
-  //   throw new Error(`Invalid file name ${sampleFile.name}`);
-  // }
-
-  // const fullPath = path.join(absolutePath, sampleFile.name);
-  //
-  // console.log("fullPath", fullPath);
-
-  // Use the mv() method to place the file somewhere on your server
-  // sampleFile.mv(fullPath, function(err) {
-  //   if (err)
-  //     return res.status(500).send(err);
-  //
-  //   res.redirect(`/files?path=${req.body.path}`);
-  // });
-
 });
 
 
@@ -97,7 +79,7 @@ router.get('/get', function(req, res, next) {
 
   res.sendFile(fsUtils.validateUserForPath(absolutePath, token).path);
 
-})
+});
 
 router.post('/delete', function(req, res, next) {
 
