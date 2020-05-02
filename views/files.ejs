@@ -1,20 +1,54 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-    <link rel='stylesheet' href='/css/bootstrap.css' />
-    <script src="/javascripts/jquery-3.5.0.min.js"></script>
-    <script src="/js/bootstrap.js"></script>
+  <%- include partials/header.ejs %>
+<body>
 
+<div class="row p-0 m-0">
+  <div class="col-md-12  p-0 m-0">
+    <%- include partials/menu.ejs %>
+  </div>
+</div>
 
-  </head>
-  <body>
-    <h1>Hi, <%= username %></h1>
-    <p>Listing files at <%= path %></p>
+<div class="container-fluid p-4">
 
-    <a href="/files?path=<%= path %>/..">../</a><br/>
+  <div class="row">
+    <div class="col-sm-1"></div>
 
+    <div class="col-sm-2"><h5>Listing files at <%= path %></h5></div>
+    <div class="col-sm-1"><a href="/files?path=<%= path %>/..">../</a></div>
+
+    <div class="col-sm-3">
+    <h5>New folder</h5>
+    <form method="post" action="directory/new">
+      <input type="text" name="foldername" />
+      <input type="hidden" value="<%= path %>" name="path">
+      <input type="submit" class="btn btn-success">
+    </form>
+    </div>
+      <div class="col-sm-4">
+
+        <h5>Upload a file</h5>
+
+        <form ref='uploadForm'
+              id='uploadForm'
+              action='files/upload'
+              method='post'
+              encType="multipart/form-data">
+
+          <input type="hidden" value="<%= path %>" name="path">
+
+          <input type="file" name="sampleFile" multiple />
+          <input type="submit" value="Upload!" class="btn btn-success" />
+        </form>
+      </div>
+
+    <div class="col-sm-1"></div>
+  </div>
+  <br>
+
+  <div class="row">
+    <div class="col-lg-1"></div>
+    <div class="col-lg-10">
 
     <table class="table table-striped">
       <tr>
@@ -22,8 +56,6 @@
         <th>Preview</th>
         <th>Created</th>
         <th>Size</th>
-        <th>Is file?</th>
-        <th>Is dir?</th>
         <th>Delete</th>
 
       </tr>
@@ -33,30 +65,32 @@
         <% if (file.details.isFile) { %>
 
           <tr style="font-weight: bold">
-            <td><a href="/files/get?path=<%= file.path %>"><%= file.name %></a></td>
+            <td class="align-middle"><a href="/files/get?path=<%= file.path %>"><%= file.name %></a></td>
 
-            <td>
+            <td class="align-middle">
               <% if (file.path.toLowerCase().endsWith('jpg') ||
                       file.path.toLowerCase().endsWith('jpeg') ||
                       file.path.toLowerCase().endsWith('png')) { %>
 
-              <img src="/files/get/preview?path=<%= file.path %>" class="img-responsive" alt="Responsive image">
+            <a href="/files/get?path=<%= file.path %>">
+              <img src="/files/get/preview?path=<%= file.path %>"
+                   class="img-fluid"
+                   style="min-width: 150px"
+                   alt="<%= file.path %>">
+            </a>
 
               <% } %>
 
             </td>
 
-<!--              <a href="/files/get/preview?path=<%= file.path %>"><%= file.name %></a></td>-->
-            <td><%= new Date(file.details.birthtime) %> </td>
-            <td><%= file.details.size %></td>
-            <td><%= file.details.isFile %></td>
-            <td><%= file.details.isDirectory %></td>
+            <td class="align-middle"><%= new Date(file.details.birthtime) %> </td>
+            <td class="align-middle"><%= Math.round(file.details.size/1024/1024*100)/100 %> MB</td>
 
             <td>
               <form action='files/delete'
                     method='post'>
 
-                <input type="hidden" value="<%= file.name %>" name="name">
+                <input type="hidden" value="c" name="name">
                 <input type="hidden" value="<%= path %>" name="path">
 
                 <input type='submit' value='delete' class="btn btn-danger"/>
@@ -69,21 +103,19 @@
           <% if (file.details.isDirectory) { %>
 
             <tr>
-              <td><a href="/files?path=<%= file.path %>"><%= file.name %></a></td>
+              <td class="align-middle"><a href="/files?path=<%= file.path %>"><%= file.name %></a></td>
               <td></td>
-              <td><%= new Date(file.details.birthtime) %> </td>
-              <td><%= file.details.size %></td>
-              <td><%= file.details.isFile %></td>
-              <td><%= file.details.isDirectory %></td>
+              <td class="align-middle"><%= new Date(file.details.birthtime) %> </td>
+              <td class="align-middle"><%= file.details.size %></td>
 
-          <td>
+          <td class="align-middle">
             <form action='directory/delete'
                   method='post'>
 
               <input type="hidden" value="<%= file.name %>" name="name">
               <input type="hidden" value="<%= path %>" name="path">
 
-              <input type='submit' value='delete' class="btn btn-danger"/>
+              <input type='submit' value='delete' class="btn btn-danger" />
             </form>
 
           </td>
@@ -96,29 +128,14 @@
 
       <% }); %>
     </table>
+    </div>
+
+    <div class="col-lg-1"></div>
+
+  </div>
 
 
-  <h1>New folder</h1>
-  <form method="post" action="directory/new">
-    New folder name <input type="text" name="foldername" />
-    <input type="hidden" value="<%= path %>" name="path">
 
-    <input type="submit" class="btn btn-success">
-  </form>
-
-    <h1>Upload a file</h1>
-
-    <form ref='uploadForm'
-          id='uploadForm'
-          action='files/upload'
-          method='post'
-          encType="multipart/form-data">
-
-      <input type="hidden" value="<%= path %>" name="path">
-
-      <input type="file" name="sampleFile" multiple />
-      <input type="submit" value="Upload!" class="btn btn-success" />
-    </form>
-
-  </body>
+</div>
+</body>
 </html>

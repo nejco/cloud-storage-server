@@ -9,9 +9,11 @@ const sharp = require('sharp');
 /* GET home page. */
 router.get('/', function(req, res, next) {
 
-  console.log(req.query);
+  if(!req.cookies.jwtToken) {
+    throw new Error('You are not logged in!');
+  }
+
   const token = JSON.parse(req.cookies.jwtToken).token;
-  console.log('token', token);
 
 
   const absolutePath = req.query.path;
@@ -50,11 +52,16 @@ router.post('/upload', function(req, res, next) {
 
   console.log("Uploaded file ", req.files);
 
+  if(!req.cookies.jwtToken) {
+    throw new Error('You are not logged in!');
+  }
+
   const token = JSON.parse(req.cookies.jwtToken).token;
   const absolutePath = fsUtils.validateUserForPath(req.body.path, token).path;
 
+  const filesArray = Array.isArray(req.files.sampleFile) ? req.files.sampleFile: [req.files.sampleFile];
 
-  req.files.sampleFile.map(file => {
+  filesArray.map(file => {
     if(file.name.includes('..')) {
       throw new Error(`Invalid file name ${file.name}`);
     }
@@ -76,6 +83,10 @@ router.post('/upload', function(req, res, next) {
 
 router.get('/get', function(req, res, next) {
 
+  if(!req.cookies.jwtToken) {
+    throw new Error('You are not logged in!');
+  }
+
   const token = JSON.parse(req.cookies.jwtToken).token;
   const absolutePath = req.query.path;
 
@@ -86,6 +97,10 @@ router.get('/get', function(req, res, next) {
 });
 
 router.get('/get/preview', function(req, res, next) {
+
+  if(!req.cookies.jwtToken) {
+    throw new Error('You are not logged in!');
+  }
 
   const token = JSON.parse(req.cookies.jwtToken).token;
   const absolutePath = req.query.path;
@@ -103,6 +118,10 @@ router.get('/get/preview', function(req, res, next) {
 });
 
 router.post('/delete', function(req, res, next) {
+
+  if(!req.cookies.jwtToken) {
+    throw new Error('You are not logged in!');
+  }
 
   const token = JSON.parse(req.cookies.jwtToken).token;
   const absolutePath = path.join(req.body.path, req.body.name);

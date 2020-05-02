@@ -17,12 +17,14 @@ router.post('/login', function(req, res, next) {
   const data = hash.update(password, 'utf-8');
   const genHash= data.digest('hex');
 
-  if(config.users[username].password === genHash) {
+  if(config.users[username] && config.users[username].password === genHash) {
     jwt.sign({username}, config.jwt.secret, (error, token) => {
-      res.cookie('jwtToken', JSON.stringify({token})).send('cookie set');
+      res.cookie('jwtToken', JSON.stringify({token})).redirect("/files?path=/");
     });
   } else {
-    res.json({error: "Invalid username or password!"});
+    res.render('index', {title: 'Log in', errorMessage: "Invalid username or password!"});
+
+    // res.json({error: "Invalid username or password!"});
 
   }
 

@@ -1,21 +1,45 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-  <a href="/files?path=%2F">login as nejc on /</a>
+<%- include partials/header.ejs %>
+
+<body>
+
+  <div class="container-fluid p-4">
+
+    <div class="row">
+      <div class="col-sm-2"></div>
+      <div class="col-sm-8">
+
+        <% if (errorMessage) { %>
+        <div class="alert alert-danger" role="alert">
+          <%= errorMessage %>
+        </div>
+
+          <% } %>
+
+      </div>
+      <div class="col-sm-2"></div>
+    </div>
 
 
-  <h1>Login</h1>
-  <form method="post" action="users/login">
-    username <input type="text" name="username"><br/>
-    password <input type="password" name="password">
-    <input type="submit" value="log in">
-
-  </form>
+      <div class="row">
+      <div class="col-sm-4"></div>
+      <div class="col-sm-4">
+        <form method="post" action="/users/login">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" name="username">
+            <small id="emailHelp" class="form-text text-muted">You need to be registered first. Contact your administrator.</small>
+          </div>
+          <div class="form-group">
+            <label for="exampleInputPassword1">Password</label>
+            <input type="password" class="form-control" id="exampleInputPassword1" name="password">
+          </div>
+          <button type="submit" class="btn btn-primary">Log in</button>
+        </form>
+      </div>
+      <div class="col-sm-4"></div>
+    </div>
+  </div>
   </body>
 </html>
