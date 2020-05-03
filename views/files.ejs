@@ -90,7 +90,7 @@
               <form action='files/delete'
                     method='post'>
 
-                <input type="hidden" value="c" name="name">
+                <input type="hidden" value="<%= file.name %>" name="name">
                 <input type="hidden" value="<%= path %>" name="path">
 
                 <input type='submit' value='delete' class="btn btn-danger"/>
