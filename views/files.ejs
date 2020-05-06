@@ -53,7 +53,6 @@
     <table class="table table-striped">
       <tr>
         <th>Name</th>
-        <th>Preview</th>
         <th>Created</th>
         <th>Size</th>
         <th>Delete</th>
@@ -64,8 +63,7 @@
 
         <% if (file.details.isFile) { %>
 
-          <tr style="font-weight: bold">
-            <td class="align-middle"><a href="/files/get?path=<%= file.path %>"><%= file.name %></a></td>
+          <tr style="font-weight: bold; text-align: center">
 
             <td class="align-middle">
               <% if (file.path.toLowerCase().endsWith('jpg') ||
@@ -80,7 +78,7 @@
             </a>
 
               <% } %>
-
+                <br><a href="/files/get?path=<%= file.path %>"><%= file.name %></a>
             </td>
 
             <td class="align-middle"><%= new Date(file.details.birthtime) %> </td>
@@ -104,7 +102,6 @@
 
             <tr>
               <td class="align-middle"><a href="/files?path=<%= file.path %>"><%= file.name %></a></td>
-              <td></td>
               <td class="align-middle"><%= new Date(file.details.birthtime) %> </td>
               <td class="align-middle"><%= file.details.size %></td>
 
