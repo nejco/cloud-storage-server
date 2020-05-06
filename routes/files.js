@@ -107,7 +107,7 @@ router.get('/get/preview', function(req, res, next) {
 
   const filePath = fsUtils.validateUserForPath(absolutePath, token).path;
 
-  sharp(filePath).resize(500).toBuffer().then(buff => {
+  sharp(filePath).resize(500).rotate().toBuffer().then(buff => {
 
     res.end(buff, 'base64');
 
