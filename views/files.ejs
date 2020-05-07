@@ -12,37 +12,61 @@
 <div class="container-fluid p-4">
 
   <div class="row">
-    <div class="col-sm-1"></div>
+<!--    <div class="col-md-1"></div>-->
 
-    <div class="col-sm-2"><h5>Listing files at <%= path %></h5></div>
-    <div class="col-sm-1"><a href="/files?path=<%= path %>/..">../</a></div>
-
-    <div class="col-sm-3">
-    <h5>New folder</h5>
-    <form method="post" action="directory/new">
-      <input type="text" name="foldername" />
-      <input type="hidden" value="<%= path %>" name="path">
-      <input type="submit" class="btn btn-success">
-    </form>
+    <div class="col-md-2"><h5>Listing files at <%= path %></h5></div>
+    <div class="col-md-2">
+      <a href="/files?path=<%= path %>/..">
+        <button type="button" class="btn btn-primary" style="width: 100px">Go ..</button>
+      </a>
     </div>
-      <div class="col-sm-4">
 
-        <h5>Upload a file</h5>
+    <div class="col-md-4">
+
+      <form method="post" action="directory/new">
+        <input type="hidden" value="<%= path %>" name="path">
+
+        <div class="form-row">
+
+            <div class="form-group col-sm-8">
+              <input type="text" name="foldername" placeholder="folder name" class="form-control"/>
+            </div>
+
+            <div class="form-group col-sm-4">
+              <input type="submit" class="btn btn-success" value="New folder" class="form-control">
+            </div>
+
+
+        </div>
+      </form>
+
+
+    </div>
+
+      <div class="col-md-4s">
 
         <form ref='uploadForm'
               id='uploadForm'
               action='files/upload'
               method='post'
               encType="multipart/form-data">
-
           <input type="hidden" value="<%= path %>" name="path">
 
-          <input type="file" name="sampleFile" multiple />
-          <input type="submit" value="Upload!" class="btn btn-success" />
+          <div class="form-row">
+            <div class="form-group col-sm-8">
+                <input type="file" class="custom-file-input" id="customFile" name="sampleFile" multiple>
+                <label style="text-align: left" class="custom-file-label" for="customFile">Choose file</label>
+            </div>
+            <div class="form-group col-sm-4">
+              <input type="submit" value="Upload!" class="btn btn-success" />
+            </div>
+          </div>
+
+
         </form>
+
       </div>
 
-    <div class="col-sm-1"></div>
   </div>
   <br>
 
