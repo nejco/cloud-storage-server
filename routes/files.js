@@ -5,6 +5,7 @@ const path = require('path');
 const fsUtils = require('../utils/FsUtils');
 const sharp = require('sharp');
 
+const itemsPerPage = 10;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -22,9 +23,12 @@ router.get('/', function(req, res, next) {
   const fullPath = validationResult.path ;
   const username = validationResult.username;
 
+  const page = Number(req.query.page) ? Number(req.query.page): 1;
+
+
   fs.readdir(fullPath, (err, files) => {
 
-    const detailedFiles = files.filter(name => !name.startsWith('.')).map(file => {
+    let detailedFiles = files.filter(name => !name.startsWith('.')).map(file => {
       const lstatFile = fsUtils.validateUserForPath(path.join(absolutePath, file), token).path;
 
       const stat = fs.lstatSync(lstatFile);
@@ -40,7 +44,22 @@ router.get('/', function(req, res, next) {
       }
     });
 
-    res.render('files', { title: 'Files viewer' , path: absolutePath, files: detailedFiles, username});
+    const numerOfPages = Math.ceil(detailedFiles.length / itemsPerPage);
+
+
+    if(page >= 1)
+      detailedFiles = detailedFiles.slice(page*itemsPerPage, page*itemsPerPage + itemsPerPage);
+
+    res.render('files',
+        {
+          title: 'Files viewer' ,
+          path: absolutePath,
+          files: detailedFiles,
+          username,
+          page,
+          itemsPerPage,
+          numerOfPages
+        });
 
   })
 
