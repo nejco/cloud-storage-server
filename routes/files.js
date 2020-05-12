@@ -47,8 +47,8 @@ router.get('/', function(req, res, next) {
     const numerOfPages = Math.ceil(detailedFiles.length / itemsPerPage);
 
 
-    if(page >= 1)
-      detailedFiles = detailedFiles.slice(page*itemsPerPage, page*itemsPerPage + itemsPerPage);
+    if(numerOfPages > 1)
+      detailedFiles = detailedFiles.slice(page * itemsPerPage, page * itemsPerPage + itemsPerPage);
 
     res.render('files',
         {
