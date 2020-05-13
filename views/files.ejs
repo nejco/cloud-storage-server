@@ -167,7 +167,7 @@
     <% } %>
 
     <%
-      for(let i = 1 ; i<numerOfPages ; i++){
+      for(let i = 1 ; i<=numerOfPages ; i++){
         %>
         <a href="/files?path=<%= path %>&page=<%= i %>"
             <% if(page===i){ %>
@@ -177,7 +177,7 @@
         ><%= i %></a>
     <% } %>
 
-        <% if(page+1 < numerOfPages){ %>
+        <% if(page+1 <= numerOfPages){ %>
             <a href="/files?path=<%= path %>&page=<%= page+1 %>">next</a>
         <% } %>
 
