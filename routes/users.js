@@ -1,13 +1,10 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 const config = require('../conf/config.json');
-var jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-
-
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+const path = require('path');
+const fsUtils = require('../utils/FsUtils');
 
 router.post('/login', function(req, res, next) {
   const username = req.body.username;
@@ -18,14 +15,34 @@ router.post('/login', function(req, res, next) {
   const genHash= data.digest('hex');
 
   if(config.users[username] && config.users[username].password === genHash) {
-    jwt.sign({username}, config.jwt.secret, (error, token) => {
-      res.cookie('jwtToken', JSON.stringify({token})).redirect("/files?path=/");
+    // add shared folders
+    const sharedFolders = require('../conf/shared.json');
+
+    const sharedWithMe = sharedFolders.shared
+        .filter(entry =>  entry.sharedWith === username )
+        .map(entry => {
+
+          const relativePath = path.join('/', entry.owner, entry.path);
+
+          // validate if owner has rights to shared folder
+          fsUtils.stripPath( relativePath, entry.owner);
+
+          return {
+            path: relativePath,
+            readOnly: entry.readOnly,
+            owner: entry.owner
+          }
+        });
+
+    jwt.sign({username, shared: sharedWithMe}, config.jwt.secret, (error, token) => {
+      if(error) {
+        throw error;
+      } else
+        res.cookie('jwtToken', JSON.stringify({token})).redirect("/files?path=/" + username);
     });
+
   } else {
     res.render('index', {title: 'Log in', errorMessage: "Invalid username or password!"});
-
-    // res.json({error: "Invalid username or password!"});
-
   }
 
 });

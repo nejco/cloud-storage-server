@@ -1,0 +1,18 @@
+{
+  "shared": [
+    {
+      "path": "hisa",
+      "owner": "nejc",
+      "sharedWith" : "eva",
+      "readOnly": true
+    },
+    {
+      "path": "eva",
+      "owner": "nejc",
+      "sharedWith" : "eva",
+      "readOnly": true
+    }
+
+
+  ]
+}

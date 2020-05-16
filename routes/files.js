@@ -7,7 +7,6 @@ const sharp = require('sharp');
 
 const itemsPerPage = 10;
 
-/* GET home page. */
 router.get('/', function(req, res, next) {
 
   if(!req.cookies.jwtToken) {
@@ -75,7 +74,13 @@ router.post('/upload', function(req, res, next) {
   }
 
   const token = JSON.parse(req.cookies.jwtToken).token;
-  const absolutePath = fsUtils.validateUserForPath(req.body.path, token).path;
+
+  const validationResult = fsUtils.validateUserForPath(req.body.path, token);
+  const absolutePath = validationResult.path;
+
+  if(validationResult.readOnly) {
+    throw new Error("You don't have permissions to edit this shared folder.")
+  }
 
   const filesArray = Array.isArray(req.files.sampleFile) ? req.files.sampleFile: [req.files.sampleFile];
 
@@ -144,13 +149,48 @@ router.post('/delete', function(req, res, next) {
   const token = JSON.parse(req.cookies.jwtToken).token;
   const absolutePath = path.join(req.body.path, req.body.name);
 
-  const filePath = fsUtils.validateUserForPath(absolutePath, token).path;
+  const validationResult = fsUtils.validateUserForPath(absolutePath, token);
+  const filePath = validationResult.path;
 
+  if(validationResult.readOnly) {
+    throw new Error("You don't have permissions to edit this shared folder.")
+  }
 
   console.log("Removing file", filePath);
   fs.unlinkSync(filePath);
   res.redirect(`/files?path=${req.body.path}`);
 });
+
+router.get('/shared', function(req, res, next) {
+
+  if(!req.cookies.jwtToken) {
+    throw new Error('You are not logged in!');
+  }
+
+  const token = JSON.parse(req.cookies.jwtToken).token;
+  const decodedToken = fsUtils.decodeToken(token);
+
+  const sharedFolders = decodedToken.shared.map(item => {
+
+    return {
+      path: item.path,
+      owner: item.owner,
+      details: {
+        isFile: false,
+        isDirectory: true,
+      }
+    };
+
+  })
+
+  res.render('shared', {
+    title: 'Shared folders' ,
+    folders: sharedFolders,
+    username: decodedToken.username
+  });
+
+});
+
 
 
 module.exports = router;

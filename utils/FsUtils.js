@@ -8,7 +8,7 @@ module.exports.filesRoot = config.filesRoot;
 function stripPath(relativePath, username) {
 
     const allowedUserPath = path.join(config.filesRoot, username);
-    const absolutePath = path.join(config.filesRoot, username, relativePath);
+    const absolutePath = path.join(config.filesRoot, relativePath);
     const realPath = fs.realpathSync(absolutePath);
 
     if(absolutePath.startsWith(allowedUserPath)) {
@@ -19,6 +19,7 @@ function stripPath(relativePath, username) {
     }
 
 }
+module.exports.stripPath = stripPath;
 
 module.exports.validateUserForPath = (relativePath, jwtToken) => {
 
@@ -27,11 +28,33 @@ module.exports.validateUserForPath = (relativePath, jwtToken) => {
     }
     // validate token
     const decoded = jwt.verify(jwtToken, config.jwt.secret);
-    return {
-        path: stripPath(relativePath, decoded.username),
-        username: decoded.username
+
+    const shared = decoded.shared.filter(item => relativePath.startsWith(item.path));
+
+    if(shared.length > 1) {
+        throw new Error("Invalid sharing configuration, found duplicate!")
     }
 
+    if(shared.length === 1) {
+        return {
+            path: stripPath(relativePath, shared[0].owner),
+            username: decoded.username,
+            readOnly: shared[0].readOnly
+        }
+    } else {
+        return {
+            path: stripPath(relativePath, decoded.username),
+            username: decoded.username,
+            readOnly: false
+        }
+    }
+
+
+};
+
+module.exports.decodeToken = (jwtToken) => {
+    const decoded = jwt.verify(jwtToken, config.jwt.secret);
+    return decoded;
 };
 
 
