@@ -5,8 +5,12 @@ const fsUtils = require('../utils/FsUtils');
 /* GET home page. */
 router.get('/', function(req, res, next) {
 
+
+
   if(req.cookies.jwtToken) {
-    const username = fsUtils.decodeToken(req.cookies.jwtToken).username;
+    const token = JSON.parse(req.cookies.jwtToken).token;
+
+    const username = fsUtils.decodeToken(token).username;
     res.redirect('/files?path=/' + username);
   } else
     res.render('index', { title: 'Log in' , errorMessage: null});
