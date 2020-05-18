@@ -79,7 +79,6 @@
         <th>Created</th>
         <th>Size</th>
         <th>Delete</th>
-
       </tr>
 
       <% files.forEach(function(file) { %>
@@ -89,19 +88,19 @@
           <tr style="font-weight: bold; text-align: center">
 
             <td class="align-middle">
-              <% if (file.path.toLowerCase().endsWith('jpg') ||
-                      file.path.toLowerCase().endsWith('jpeg') ||
-                      file.path.toLowerCase().endsWith('png')) { %>
+              <% if (file.name.toLowerCase().endsWith('jpg') ||
+                      file.name.toLowerCase().endsWith('jpeg') ||
+                      file.name.toLowerCase().endsWith('png')) { %>
 
-            <a href="/files/get?path=<%= file.path %>">
-              <img src="/files/get/preview?path=<%= file.path %>"
+            <a href="/files/get/<%= file.name %>?path=<%= file.path %>">
+              <img src="/files/get/preview/<%= file.name %>?path=<%= file.path %>"
                    class="img-fluid"
                    style="min-width: 150px"
-                   alt="<%= file.path %>">
+                   alt="<%= file.name %>">
             </a>
 
               <% } %>
-                <br><a href="/files/get?path=<%= file.path %>"><%= file.name %></a>
+                <br><a href="/files/get/<%= file.name %>?path=<%= file.path %>"><%= file.name %></a>
             </td>
 
             <td class="align-middle"><%= new Date(file.details.birthtime) %> </td>
@@ -124,7 +123,7 @@
           <% if (file.details.isDirectory) { %>
 
             <tr>
-              <td class="align-middle"><a href="/files?path=<%= file.path %>"><%= file.name %></a></td>
+              <td class="align-middle"><a href="/files?path=<%= file.path %>/<%= file.name %>"><%= file.name %></a></td>
               <td class="align-middle"><%= new Date(file.details.birthtime) %> </td>
               <td class="align-middle"><%= file.details.size %></td>
 

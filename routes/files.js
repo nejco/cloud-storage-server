@@ -33,7 +33,7 @@ router.get('/', function(req, res, next) {
       const stat = fs.lstatSync(lstatFile);
       return {
         name: file,
-        path: path.join(absolutePath, file),
+        path: absolutePath,
         details: {
           isFile: stat.isFile(),
           isDirectory: stat.isDirectory(),
@@ -104,14 +104,14 @@ router.post('/upload', function(req, res, next) {
 });
 
 
-router.get('/get', function(req, res, next) {
+router.get('/get/:fileName', function(req, res, next) {
 
   if(!req.cookies.jwtToken) {
     throw new Error('You are not logged in!');
   }
 
   const token = JSON.parse(req.cookies.jwtToken).token;
-  const absolutePath = req.query.path;
+  const absolutePath = path.join(req.query.path, req.params.fileName);
 
   const filePath = fsUtils.validateUserForPath(absolutePath, token).path;
 
@@ -119,14 +119,14 @@ router.get('/get', function(req, res, next) {
 
 });
 
-router.get('/get/preview', function(req, res, next) {
+router.get('/get/preview/:fileName', function(req, res, next) {
 
   if(!req.cookies.jwtToken) {
     throw new Error('You are not logged in!');
   }
 
   const token = JSON.parse(req.cookies.jwtToken).token;
-  const absolutePath = req.query.path;
+  const absolutePath = path.join(req.query.path, req.params.fileName);
 
   const filePath = fsUtils.validateUserForPath(absolutePath, token).path;
 
