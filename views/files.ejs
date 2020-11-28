@@ -74,77 +74,21 @@
     <div class="col-lg-10">
 
     <table class="table table-striped">
-      <tr>
-        <th>Name</th>
-        <th>Created</th>
-        <th>Size</th>
-        <th>Delete</th>
-      </tr>
+<!--      <tr>-->
+<!--        <th>Name</th>-->
+<!--        <th>Modified</th>-->
+<!--        <th>Select</th>-->
+<!--      </tr>-->
 
       <% files.forEach(function(file) { %>
 
         <% if (file.details.isFile) { %>
-
-          <tr style="font-weight: bold; text-align: center">
-
-            <td class="align-middle">
-              <% if (file.name.toLowerCase().endsWith('jpg') ||
-                      file.name.toLowerCase().endsWith('jpeg') ||
-                      file.name.toLowerCase().endsWith('png')) { %>
-
-            <a href="/files/get/<%= file.name %>?path=<%= file.path %>">
-              <img src="/files/get/preview/<%= file.name %>?path=<%= file.path %>"
-                   class="img-fluid"
-                   style="min-width: 150px"
-                   alt="<%= file.name %>">
-            </a>
-
-              <% } %>
-                <br><a href="/files/get/<%= file.name %>?path=<%= file.path %>"><%= file.name %></a>
-            </td>
-
-            <td class="align-middle"><%= new Date(file.details.birthtime) %> </td>
-            <td class="align-middle"><%= Math.round(file.details.size/1024/1024*100)/100 %> MB</td>
-
-            <td>
-              <form action='files/delete'
-                    method='post'>
-
-                <input type="hidden" value="<%= file.name %>" name="name">
-                <input type="hidden" value="<%= path %>" name="path">
-
-                <input type='submit' value='delete' class="btn btn-danger"/>
-              </form>
-
-            </td>
-          </tr>
+          <%- include partials/fileTr.ejs %>
         <% } %>
 
-          <% if (file.details.isDirectory) { %>
-
-            <tr>
-              <td class="align-middle"><a href="/files?path=<%= file.path %>/<%= file.name %>"><%= file.name %></a></td>
-              <td class="align-middle"><%= new Date(file.details.birthtime) %> </td>
-              <td class="align-middle"><%= file.details.size %></td>
-
-          <td class="align-middle">
-            <form action='directory/delete'
-                  method='post'>
-
-              <input type="hidden" value="<%= file.name %>" name="name">
-              <input type="hidden" value="<%= path %>" name="path">
-
-              <input type='submit' value='delete' class="btn btn-danger" />
-            </form>
-
-          </td>
-        </tr>
-          <% } %>
-
-
-
-
-
+        <% if (file.details.isDirectory) { %>
+          <%- include partials/folderTr.ejs %>
+        <% } %>
       <% }); %>
     </table>
     </div>

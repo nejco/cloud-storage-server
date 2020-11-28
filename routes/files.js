@@ -1,20 +1,28 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const fsUtils = require('../utils/FsUtils');
 const sharp = require('sharp');
+let token = {};
 
-const itemsPerPage = 10;
+const itemsPerPage = 10; // TODO dynamic
 
-router.get('/', function(req, res, next) {
-
+router.use(function (req, res, next) {
   if(!req.cookies.jwtToken) {
-    throw new Error('You are not logged in!');
+    return res.render('index', { title: 'Log in' , errorMessage: null});
   }
 
-  const token = JSON.parse(req.cookies.jwtToken).token;
+  try {
+    token = JSON.parse(req.cookies.jwtToken).token;
+    fsUtils.decodeToken(token)
+  } catch (error) {
+    throw new Error(error)
+  }
+  next();
+})
 
+router.get('/', function(req, res, next) {
 
   const absolutePath = req.query.path;
   const validationResult = fsUtils.validateUserForPath(absolutePath, token);
@@ -23,7 +31,6 @@ router.get('/', function(req, res, next) {
   const username = validationResult.username;
 
   const page = Number(req.query.page) ? Number(req.query.page): 1;
-
 
   fs.readdir(fullPath, (err, files) => {
 
@@ -69,12 +76,6 @@ router.post('/upload', function(req, res, next) {
 
   console.log("Uploaded file ", req.files);
 
-  if(!req.cookies.jwtToken) {
-    throw new Error('You are not logged in!');
-  }
-
-  const token = JSON.parse(req.cookies.jwtToken).token;
-
   const validationResult = fsUtils.validateUserForPath(req.body.path, token);
   const absolutePath = validationResult.path;
 
@@ -105,31 +106,18 @@ router.post('/upload', function(req, res, next) {
 
 
 router.get('/get/:fileName', function(req, res, next) {
-
-  if(!req.cookies.jwtToken) {
-    throw new Error('You are not logged in!');
-  }
-
-  const token = JSON.parse(req.cookies.jwtToken).token;
   const absolutePath = path.join(req.query.path, req.params.fileName);
-
   const filePath = fsUtils.validateUserForPath(absolutePath, token).path;
-
   res.sendFile(filePath);
 
 });
 
 router.get('/get/preview/:fileName', function(req, res, next) {
-
-  if(!req.cookies.jwtToken) {
-    throw new Error('You are not logged in!');
-  }
-
-  const token = JSON.parse(req.cookies.jwtToken).token;
   const absolutePath = path.join(req.query.path, req.params.fileName);
 
   const filePath = fsUtils.validateUserForPath(absolutePath, token).path;
 
+  // TODO make this as an option in GUI
   sharp(filePath).resize(500).rotate().toBuffer().then(buff => {
 
     res.end(buff, 'base64');
@@ -142,11 +130,6 @@ router.get('/get/preview/:fileName', function(req, res, next) {
 
 router.post('/delete', function(req, res, next) {
 
-  if(!req.cookies.jwtToken) {
-    throw new Error('You are not logged in!');
-  }
-
-  const token = JSON.parse(req.cookies.jwtToken).token;
   const absolutePath = path.join(req.body.path, req.body.name);
 
   const validationResult = fsUtils.validateUserForPath(absolutePath, token);
@@ -163,11 +146,6 @@ router.post('/delete', function(req, res, next) {
 
 router.get('/shared', function(req, res, next) {
 
-  if(!req.cookies.jwtToken) {
-    throw new Error('You are not logged in!');
-  }
-
-  const token = JSON.parse(req.cookies.jwtToken).token;
   const decodedToken = fsUtils.decodeToken(token);
 
   const sharedFolders = decodedToken.shared.map(item => {
@@ -190,7 +168,5 @@ router.get('/shared', function(req, res, next) {
   });
 
 });
-
-
 
 module.exports = router;

@@ -5,8 +5,6 @@ const fsUtils = require('../utils/FsUtils');
 /* GET home page. */
 router.get('/', function(req, res, next) {
 
-
-
   if(req.cookies.jwtToken) {
     const token = JSON.parse(req.cookies.jwtToken).token;
 

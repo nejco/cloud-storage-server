@@ -4,13 +4,23 @@ const fs = require('fs');
 const path = require('path');
 const fsUtils = require('../utils/FsUtils');
 
+let token = {};
+router.use(function (req, res, next) {
+  if(!req.cookies.jwtToken) {
+    return res.render('index', { title: 'Log in' , errorMessage: null});
+  }
 
-const filesRoot = '/Users/nvidrih/cm/cloud-storage-server/files-root';
+  try {
+    token = JSON.parse(req.cookies.jwtToken).token;
+    fsUtils.decodeToken(token)
+  } catch (error) {
+    throw new Error(error)
+  }
+  next();
+})
 
 
 router.post('/new', function(req, res, next) {
-
-  const token = JSON.parse(req.cookies.jwtToken).token;
   let absolutePath = fsUtils.validateUserForPath(req.body.path, token).path;
 
   absolutePath = path.join(absolutePath, req.body.foldername);
@@ -18,7 +28,6 @@ router.post('/new', function(req, res, next) {
   if (!fs.existsSync(absolutePath)){
     fs.mkdirSync(absolutePath);
     console.log(`New folder at ${absolutePath} created.`)
-    //  TODO: Create metadata dir
   }
 
   res.redirect(`/files?path=${req.body.path}`);
@@ -26,9 +35,6 @@ router.post('/new', function(req, res, next) {
 });
 
 router.post('/delete', function(req, res, next) {
-
-  const token = JSON.parse(req.cookies.jwtToken).token;
-
   let absolutePath = fsUtils.validateUserForPath(path.join(req.body.path, req.body.name), token).path;
 
   console.log("Removing file", absolutePath);
