@@ -30,12 +30,14 @@
       <table class="table table-striped">
         <tr>
           <th style="text-align: center; font-size: smaller" class="align-middle">
-            <%= path %>
-          </th>
-          <th style="text-align: center">
             <a href="/files?path=<%= encodeURIComponent(path) %>/..">
               <button type="button" class="btn btn-primary" style="width: 80px">Go ..</button>
             </a>
+
+          </th>
+          <th style="text-align: center">
+            <%= path %>
+
           </th>
           <th>
             <input type="checkbox" class="form-check-input position-static" id="selectAll">
