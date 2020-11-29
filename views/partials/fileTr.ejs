@@ -35,15 +35,11 @@
 
 
 
-    <td>
-        <form action='files/delete'
-              method='post'>
-
-            <input type="hidden" value="<%= file.name %>" name="name">
-            <input type="hidden" value="<%= path %>" name="path">
-
-            <input type='submit' value='delete' class="btn btn-danger"/>
-        </form>
-
+    <td class="align-middle">
+        <input type="checkbox"
+               class="form-check-input position-static"
+               id="<%= file.name %>"
+               name="<%= file.name %>"
+               form="deleteItem" />
     </td>
 </tr>

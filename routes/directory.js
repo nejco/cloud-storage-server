@@ -34,14 +34,4 @@ router.post('/new', function(req, res, next) {
 
 });
 
-router.post('/delete', function(req, res, next) {
-  let absolutePath = fsUtils.validateUserForPath(path.join(req.body.path, req.body.name), token).path;
-
-  console.log("Removing file", absolutePath);
-  fs.rmdirSync(absolutePath);
-  res.redirect(`/files?path=${req.body.path}`);
-
-});
-
-
 module.exports = router;

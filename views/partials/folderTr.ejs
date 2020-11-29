@@ -10,19 +10,21 @@
         </a>
     </td>
 
-    <td class="align-left"><a href="/files?path=<%= file.path %>/<%= file.name %>"><%= file.name %></a></td>
-    <td class="align-middle"><%= new Date(file.details.birthtime) %> </td>
-    <td class="align-middle"></td>
+    <td class="align-left">
+
+        <a style="font-weight: bold" href="/files?path=<%= file.path %>/<%= file.name %>"><%= file.name %></a><br>
+
+        <%= new Date(file.details.birthtime).toDateString() %>
+        <%= new Date(file.details.birthtime).toLocaleTimeString() %>
+
+    </td>
 
     <td class="align-middle">
-        <form action='directory/delete'
-              method='post'>
-
-            <input type="hidden" value="<%= file.name %>" name="name">
-            <input type="hidden" value="<%= path %>" name="path">
-
-            <input type='submit' value='delete' class="btn btn-danger" />
-        </form>
+        <input type="checkbox"
+               class="form-check-input position-static"
+               id="<%= file.name %>"
+               name="<%= file.name %>"
+               form="deleteItem" />
 
     </td>
 </tr>

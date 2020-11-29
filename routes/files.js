@@ -130,17 +130,31 @@ router.get('/get/preview/:fileName', function(req, res, next) {
 
 router.post('/delete', function(req, res, next) {
 
-  const absolutePath = path.join(req.body.path, req.body.name);
+  const fullPath = req.body.path;
+  const selectedItems = Object.keys(req.body).filter(item => item !== 'path');
 
-  const validationResult = fsUtils.validateUserForPath(absolutePath, token);
-  const filePath = validationResult.path;
 
-  if(validationResult.readOnly) {
-    throw new Error("You don't have permissions to edit this shared folder.")
+  for(let item of selectedItems) {
+    const absolutePath = path.join(fullPath, item);
+    const validationResult = fsUtils.validateUserForPath(absolutePath, token);
+
+    const filePath = validationResult.path;
+
+    if(validationResult.readOnly) {
+      throw new Error("You don't have permissions to edit this shared folder.")
+    }
+
+    console.error('removing file at path', absolutePath)
+
+    if(fs.lstatSync(filePath).isDirectory()) {
+      fs.rmdirSync(filePath);
+    } else if (fs.lstatSync(filePath).isFile()) {
+      fs.unlinkSync(filePath);
+    } else {
+      throw new Error(`Could not delete ${filePath}. Unknown target type!`)
+    }
   }
 
-  console.log("Removing file", filePath);
-  fs.unlinkSync(filePath);
   res.redirect(`/files?path=${req.body.path}`);
 });
 
