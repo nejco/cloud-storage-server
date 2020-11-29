@@ -13,44 +13,32 @@
 
 <input type="hidden" value="<%= path %>" name="path" form="deleteItem">
 
+<br>
 
-<div class="container-fluid p-4">
+<div class="row">
 
-  <div class="row">
-
-    <div class="col-md-2"><h5>Listing files at <%= path %></h5></div>
-    <div class="col-md-2">
-      <a href="/files?path=<%= encodeURIComponent(path) %>/..">
-        <button type="button" class="btn btn-primary" style="width: 100px">Go ..</button>
-      </a>
-    </div>
-
-    <div class="col-md-4">
-
-    </div>
-
-      <div class="col-md-4s">
-
-
-      </div>
-
+  <div class="col-lg"></div>
+  <div class="col-sm" style="text-align: center; letter-spacing: 5px">
+    <%- include partials/pageNumbers.ejs %>
   </div>
-  <br>
+  <div class="col-lg"></div>
+</div>
+<br>
 
   <div class="row">
     <div class="col-lg-1"></div>
-    <div class="col-lg-10">
-
-
-
+    <div class="col-xs-12 col-lg-10">
 
       <table class="table table-striped">
         <tr>
-          <th>
+          <th style="text-align: center;">
+            <%= path %>
 
           </th>
           <th>
-
+            <a href="/files?path=<%= encodeURIComponent(path) %>/..">
+              <button type="button" class="btn btn-primary" style="width: 100px">Go ..</button>
+            </a>
           </th>
           <th>
             <input type="checkbox" class="form-check-input position-static" id="selectAll">
@@ -77,35 +65,11 @@
 
   <div class="row">
 
-  <div class="col">
-  </div>
-
-    <div class="col" style="text-align: center;">
-
-    <% if(page > 1){ %>
-        <a href="/files?path=<%= path %>&page=<%= page-1 %>">previous</a>
-    <% } %>
-
-    <%
-      for(let i = 1 ; i<=numerOfPages ; i++){
-        %>
-        <a href="/files?path=<%= path %>&page=<%= i %>"
-            <% if(page===i){ %>
-                style="text-decoration: underline; font-weight: bold"
-            <% } %>
-
-        ><%= i %></a>
-    <% } %>
-
-        <% if(page+1 <= numerOfPages){ %>
-            <a href="/files?path=<%= path %>&page=<%= page+1 %>">next</a>
-        <% } %>
-
-
+  <div class="col-lg"></div>
+    <div class="col-sm" style="text-align: center; letter-spacing: 5px">
+      <%- include partials/pageNumbers.ejs %>
     </div>
-
-    <div class="col">
-    </div>
+    <div class="col-lg"></div>
   </div>
 
 </div>
