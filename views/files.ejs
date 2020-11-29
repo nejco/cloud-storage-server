@@ -18,7 +18,7 @@
 
     <div class="col-md-2"><h5>Listing files at <%= path %></h5></div>
     <div class="col-md-2">
-      <a href="/files?path=<%= path %>/..">
+      <a href="/files?path=<%= encodeURIComponent(path) %>/..">
         <button type="button" class="btn btn-primary" style="width: 100px">Go ..</button>
       </a>
     </div>

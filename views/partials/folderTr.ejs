@@ -12,7 +12,7 @@
 
     <td class="align-left">
 
-        <a style="font-weight: bold" href="/files?path=<%= file.path %>/<%= file.name %>"><%= file.name %></a><br>
+        <a style="font-weight: bold" href="/files?path=<%= encodeURIComponent(file.path) %>/<%= encodeURIComponent(file.name) %>"><%= file.name %></a><br>
 
         <%= new Date(file.details.birthtime).toDateString() %>
         <%= new Date(file.details.birthtime).toLocaleTimeString() %>

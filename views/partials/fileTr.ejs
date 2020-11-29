@@ -1,13 +1,13 @@
 <tr>
 
     <td class="align-middle" style="text-align: center">
-        <a href="/files/get/<%= file.name %>?path=<%= file.path %>">
+        <a href="/files/get/<%= encodeURIComponent(file.name) %>?path=<%= encodeURIComponent(file.path) %>">
 
         <% if (file.name.toLowerCase().endsWith('jpg') ||
                 file.name.toLowerCase().endsWith('jpeg') ||
                 file.name.toLowerCase().endsWith('png')) { %>
 
-                <img src="/files/get/preview/<%= file.name %>?path=<%= file.path %>"
+                <img src="/files/get/preview/<%= encodeURIComponent(file.name) %>?path=<%= encodeURIComponent(file.path) %>"
                      class="img-fluid"
                      style="min-width: 150px; max-height: 500px"
                      alt="<%= file.name %>">
@@ -23,7 +23,7 @@
     </td>
 
     <td class="align-left">
-        <a  style="font-weight: bold" href="/files/get/<%= file.name %>?path=<%= file.path %>"><%= file.name %></a><br>
+        <a  style="font-weight: bold" href="/files/get/<%= encodeURIComponent(file.name) %>?path=<%= encodeURIComponent(file.path) %>"><%= file.name %></a><br>
 
         <%= new Date(file.details.birthtime).toDateString() %>
         <%= new Date(file.details.birthtime).toLocaleTimeString() %> -
