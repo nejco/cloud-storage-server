@@ -22,8 +22,8 @@
 
     </td>
 
-    <td class="align-left">
-        <a  style="font-weight: bold" href="/files/get/<%= encodeURIComponent(file.name) %>?path=<%= encodeURIComponent(file.path) %>"><%= file.name %></a><br>
+    <td class="align-left" style="font-size: smaller">
+        <a  style="font-weight: bold;" href="/files/get/<%= encodeURIComponent(file.name) %>?path=<%= encodeURIComponent(file.path) %>"><%= file.name %></a><br>
 
         <%= new Date(file.details.birthtime).toDateString() %>
         <%= new Date(file.details.birthtime).toLocaleTimeString() %> -
