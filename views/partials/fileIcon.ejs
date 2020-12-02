@@ -9,7 +9,7 @@
 
 <% } else if(file.name.toLowerCase().endsWith('mp4')) { %>
 
-    <video style="max-width: 500px;width: 100%    !important; height: auto   !important;" controls preload="none">
+    <video style="max-width: 500px;width: 100%    !important; height: auto   !important;" controls preload="metadata">
         <source src="/files/get/<%= encodeURIComponent(file.name) %>?path=<%= encodeURIComponent(file.path) %>" type="video/mp4">
     </video>
 
