@@ -16,7 +16,7 @@
 <input type="hidden" value="<%= path %>" name="path" form="deleteItem">
 
 
-<div class="row">
+<div class="row p-0 m-0">
 
   <div class="col-lg"></div>
   <div class="col-lg-10" style="text-align: center; letter-spacing: 5px">
@@ -29,7 +29,7 @@
       <table class="table table-striped table-hover">
         <thead>
           <th style="text-align: center; font-size: smaller" class="align-middle">
-            <a href="/files?path=<%= encodeURIComponent(path) %>/..">
+            <a href="/files?path=<%= parentDir %>">
               <button type="button" class="btn btn-primary" style="width: 80px">Go ..</button>
             </a>
           </th>
@@ -59,7 +59,7 @@
 
   </div>
 
-  <div class="row">
+  <div class="row p-0 m-0">
 
   <div class="col-lg"></div>
     <div class="col-sm" style="text-align: center; letter-spacing: 5px">

@@ -31,6 +31,9 @@ router.get('/', function(req, res, next) {
   const username = validationResult.username;
 
   const page = Number(req.query.page) ? Number(req.query.page): 1;
+  const parentDir =  absolutePath.split('/').slice(0, -1).join('/');
+
+  const escapedPath = absolutePath.split('/').map(item => encodeURIComponent(item)).join('/');
 
   fs.readdir(fullPath, (err, files) => {
 
@@ -41,6 +44,7 @@ router.get('/', function(req, res, next) {
       return {
         name: file,
         path: absolutePath,
+        escapedPath,
         details: {
           isFile: stat.isFile(),
           isDirectory: stat.isDirectory(),
@@ -60,6 +64,7 @@ router.get('/', function(req, res, next) {
           title: 'Files viewer' ,
           path: absolutePath,
           files: detailedFiles,
+          parentDir,
           username,
           page,
           itemsPerPage,

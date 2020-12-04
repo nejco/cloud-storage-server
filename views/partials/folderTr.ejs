@@ -1,7 +1,7 @@
 <tr>
 
     <td class="align-middle" style="text-align: center">
-        <a href="/files?path=<%= file.path %>/<%= file.name %>">
+        <a href="/files?path=<%= file.escapedPath %>/<%= encodeURIComponent(file.name) %>">
 
             <svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-folder" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                 <path d="M9.828 4a3 3 0 0 1-2.12-.879l-.83-.828A1 1 0 0 0 6.173 2H2.5a1 1 0 0 0-1 .981L1.546 4h-1L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3v1z"/>
@@ -12,7 +12,7 @@
 
     <td class="align-left text-secondary" style="font-size: smaller">
 
-        <a style="font-weight: bold" href="/files?path=<%= encodeURIComponent(file.path) %>/<%= encodeURIComponent(file.name) %>"><%= file.name %></a><br>
+        <a style="font-weight: bold" href="/files?path=<%= file.escapedPath %>/<%= encodeURIComponent(file.name) %>"><%= file.name %></a><br>
 
         <%= new Date(file.details.birthtime).toDateString() %>
         <%= new Date(file.details.birthtime).toLocaleTimeString() %>

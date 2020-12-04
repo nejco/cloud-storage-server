@@ -10,6 +10,8 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const filesRouter = require('./routes/files');
 const directoryRouter = require('./routes/directory');
+const settingsRouter = require('./routes/settings');
+
 
 
 
@@ -32,6 +34,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/files', filesRouter);
 app.use('/directory', directoryRouter);
+app.use('/settings', settingsRouter);
 
 
 
