@@ -1,18 +1,10 @@
 {
   "shared": [
     {
-      "path": "hisa",
+      "path": "shared-folder-name",
       "owner": "nejc",
-      "sharedWith" : "eva",
-      "readOnly": true
-    },
-    {
-      "path": "eva",
-      "owner": "nejc",
-      "sharedWith" : "eva",
+      "sharedWith" : "username",
       "readOnly": true
     }
-
-
   ]
 }
