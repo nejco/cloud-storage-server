@@ -5,7 +5,7 @@
   }
 },
 
-  "filesRoot": "/Users/nvidrih/cm/cloud-storage-server/files-root",
+  "filesRoot": "cloud-storage-server/files-root",
   "jwt": {
     "secret": "pleaseGenerateYourOwnJWTSecretString",
     "ttl": 3600
