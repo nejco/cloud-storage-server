@@ -7,7 +7,7 @@
 
   "filesRoot": "/Users/nvidrih/cm/cloud-storage-server/files-root",
   "jwt": {
-    "secret": "MU1Gf1e9UCvyOvKY0Pl+5thMISb8Kuds",
+    "secret": "pleaseGenerateYourOwnJWTSecretString",
     "ttl": 3600
   }
 }
