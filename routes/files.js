@@ -6,7 +6,7 @@ const fsUtils = require('../utils/FsUtils');
 const sharp = require('sharp');
 let token = {};
 
-const itemsPerPage = 10; // TODO dynamic
+const itemsPerPage = 50; // TODO dynamic
 
 router.use(function (req, res, next) {
   if(!req.cookies.jwtToken) {
