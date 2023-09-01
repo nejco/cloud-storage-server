@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html>
-  <%- include partials/header.ejs %>
+  <%- include("partials/header.ejs") %>
 <body>
-<%- include ./partials/fileUpload.ejs %>
-<%- include ./partials/newFolder.ejs %>
+<%- include("./partials/fileUpload.ejs") %>
+<%- include("./partials/newFolder.ejs") %>
 
 <div class="container-responsive">
 
 <div class="row p-0 m-0">
   <div class="col-md-12  p-0 m-0">
-    <%- include partials/menu.ejs %>
+    <%- include("partials/menu.ejs") %>
   </div>
 </div>
 
@@ -20,7 +20,7 @@
 
   <div class="col-lg"></div>
   <div class="col-lg-10" style="text-align: center; letter-spacing: 5px">
-    <%- include partials/pageNumbers.ejs %>
+    <%- include("partials/pageNumbers.ejs") %>
   </div>
   <div class="col-lg"></div>
 </div>
@@ -45,11 +45,11 @@
         <% files.forEach(function(file) { %>
 
           <% if (file.details.isFile) { %>
-            <%- include partials/fileTr.ejs %>
+            <%- include("partials/fileTr.ejs") %>
           <% } %>
 
           <% if (file.details.isDirectory) { %>
-            <%- include partials/folderTr.ejs %>
+            <%- include("partials/folderTr.ejs") %>
           <% } %>
         <% }); %>
         </tbody>
@@ -63,7 +63,7 @@
 
   <div class="col-lg"></div>
     <div class="col-sm" style="text-align: center; letter-spacing: 5px">
-      <%- include partials/pageNumbers.ejs %>
+      <%- include("partials/pageNumbers.ejs") %>
     </div>
     <div class="col-lg"></div>
   </div>
