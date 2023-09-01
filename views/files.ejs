@@ -45,11 +45,11 @@
         <% files.forEach(function(file) { %>
 
           <% if (file.details.isFile) { %>
-            <%- include("partials/fileTr.ejs") %>
+            <%- include("partials/fileTr.ejs", {file: file}) %>
           <% } %>
 
           <% if (file.details.isDirectory) { %>
-            <%- include("partials/folderTr.ejs") %>
+            <%- include("partials/folderTr.ejs", {file: file}) %>
           <% } %>
         <% }); %>
         </tbody>
