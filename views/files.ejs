@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <%- include("partials/header.ejs") %>
+<body>
+<%- include("./partials/fileUpload.ejs") %>
+<%- include("./partials/newFolder.ejs") %>
+
+<div class="container-responsive">
+
+<div class="row p-0 m-0">
+  <div class="col-md-12  p-0 m-0">
+    <%- include("partials/menu.ejs") %>
+  </div>
+</div>
+
+<input type="hidden" value="<%= path %>" name="path" form="deleteItem">
+
+
+<div class="row p-0 m-0">
+
+  <div class="col-lg"></div>
+  <div class="col-lg-10" style="text-align: center; letter-spacing: 5px">
+    <%- include("partials/pageNumbers.ejs") %>
+  </div>
+  <div class="col-lg"></div>
+</div>
+
+  <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead>
+          <th style="text-align: center; font-size: smaller" class="align-middle">
+            <a href="/files?path=<%= parentDir %>">
+              <button type="button" class="btn btn-primary" style="width: 80px">Go ..</button>
+            </a>
+          </th>
+          <th class="align-middle">
+            <%= path %>
+          </th>
+          <th>
+            <input type="checkbox" class="form-check-input position-static" id="selectAll">
+          </th>
+        </thead>
+        <tbody>
+
+        <% files.forEach(function(file) { %>
+
+          <% if (file.details.isFile) { %>
+            <%- include("partials/fileTr.ejs", {file: file}) %>
+          <% } %>
+
+          <% if (file.details.isDirectory) { %>
+            <%- include("partials/folderTr.ejs", {file: file}) %>
+          <% } %>
+        <% }); %>
+        </tbody>
+      </table>
+
+
+
+  </div>
+
+  <div class="row p-0 m-0">
+
+  <div class="col-lg"></div>
+    <div class="col-sm" style="text-align: center; letter-spacing: 5px">
+      <%- include("partials/pageNumbers.ejs") %>
+    </div>
+    <div class="col-lg"></div>
+  </div>
+
+</div>
+
+</div>
+</body>
+</html>
+

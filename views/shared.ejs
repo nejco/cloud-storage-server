@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <%- include("partials/header.ejs") %>
+<body>
+
+<div class="row p-0 m-0">
+  <div class="col-md-12  p-0 m-0">
+    <%- include("partials/menu.ejs") %>
+  </div>
+</div>
+
+<div class="container-fluid p-4">
+
+  <div class="row">
+
+    <div class="col-md-2"><h5>Listing shared folders</h5></div>
+    <div class="col-md-2">
+
+    </div>
+
+    <div class="col-md-4">
+    </div>
+
+      <div class="col-md-4">
+      </div>
+
+  </div>
+  <br>
+
+  <div class="row">
+    <div class="col-lg-1"></div>
+    <div class="col-lg-10">
+
+    <table class="table table-striped">
+      <tr>
+        <th>Name</th>
+        <th>Owner</th>
+
+      </tr>
+
+      <% folders.forEach((folder) => { %>
+
+        <tr>
+          <td class="align-middle"><a href="/files?path=<%= folder.path %>"><%= folder.path %></a></td>
+          <td class="align-middle"><%= folder.owner %></td>
+
+        </tr>
+
+      <% }); %>
+    </table>
+    </div>
+
+    <div class="col-lg-1"></div>
+
+  </div>
+
+  <div class="row">
+
+  <div class="col">
+  </div>
+
+    <div class="col" style="text-align: center;">
+    </div>
+
+    <div class="col">
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
+

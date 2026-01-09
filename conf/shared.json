@@ -1,0 +1,10 @@
+{
+  "shared": [
+    {
+      "path": "shared-folder-name",
+      "owner": "nejc",
+      "sharedWith" : "username",
+      "readOnly": true
+    }
+  ]
+}
