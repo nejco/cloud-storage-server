@@ -1,37 +1,30 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 const fs = require('fs');
 const path = require('path');
+const createError = require('http-errors');
 const fsUtils = require('../utils/FsUtils');
+const { requireAuth } = require('../utils/auth');
 
-let token = {};
-router.use(function (req, res, next) {
-  if(!req.cookies.jwtToken) {
-    return res.render('index', { title: 'Log in' , errorMessage: null});
+router.use(requireAuth);
+
+router.post('/new', function (req, res) {
+  const user = res.locals.user;
+  const parent = fsUtils.validateUserForPath(req.body.path, user);
+
+  if (parent.readOnly) {
+    throw createError(403, "You don't have permissions to edit this shared folder.");
   }
 
-  try {
-    token = JSON.parse(req.cookies.jwtToken).token;
-    fsUtils.decodeToken(token)
-  } catch (error) {
-    throw new Error(error)
-  }
-  next();
-})
+  const folderName = fsUtils.safeName(req.body.foldername);
+  const target = fsUtils.validateUserForPath(path.posix.join(parent.relativePath, folderName), user, { allowMissing: true });
 
-
-router.post('/new', function(req, res, next) {
-  let absolutePath = fsUtils.validateUserForPath(req.body.path, token).path;
-
-  absolutePath = path.join(absolutePath, req.body.foldername);
-
-  if (!fs.existsSync(absolutePath)){
-    fs.mkdirSync(absolutePath);
-    console.log(`New folder at ${absolutePath} created.`)
+  if (!fs.existsSync(target.path)) {
+    fs.mkdirSync(target.path);
+    console.log(`New folder at ${target.path} created.`);
   }
 
-  res.redirect(`/files?path=${req.body.path}`);
-
+  res.redirect(`/files?path=${encodeURIComponent(parent.relativePath)}`);
 });
 
 module.exports = router;

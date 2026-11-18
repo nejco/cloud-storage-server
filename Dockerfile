@@ -1,12 +1,12 @@
-FROM node:lts-alpine3.18
+FROM node:26-alpine
+
+ENV NODE_ENV=production
+WORKDIR /app
 EXPOSE 3000
 
-
 COPY package.json package-lock.json ./
-
-RUN npm i
+RUN npm ci --omit=dev && npm cache clean --force
 
 COPY . .
 
-
-CMD ["npm", "start"]
+CMD ["node", "./bin/www"]

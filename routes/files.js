@@ -2,190 +2,160 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
-const fsUtils = require('../utils/FsUtils');
+const createError = require('http-errors');
 const sharp = require('sharp');
-let token = {};
+const fsUtils = require('../utils/FsUtils');
+const { requireAuth } = require('../utils/auth');
 
 const itemsPerPage = 50; // TODO dynamic
 
-router.use(function (req, res, next) {
-  if(!req.cookies.jwtToken) {
-    return res.render('index', { title: 'Log in' , errorMessage: null});
-  }
+router.use(requireAuth);
 
-  try {
-    token = JSON.parse(req.cookies.jwtToken).token;
-    fsUtils.decodeToken(token)
-  } catch (error) {
-    throw new Error(error)
-  }
-  next();
-})
+const filesUrl = (relativePath) => `/files?path=${encodeURIComponent(relativePath)}`;
 
-router.get('/', function(req, res, next) {
+router.get('/', async function (req, res) {
+  const validationResult = fsUtils.validateUserForPath(req.query.path, res.locals.user);
 
-  const absolutePath = req.query.path;
-  const validationResult = fsUtils.validateUserForPath(absolutePath, token);
-
-  const fullPath = validationResult.path ;
+  const fullPath = validationResult.path;
+  const relativePath = validationResult.relativePath;
   const username = validationResult.username;
 
-  const page = Number(req.query.page) ? Number(req.query.page): 1;
-  const parentDir =  absolutePath.split('/').slice(0, -1).join('/');
-
-  const escapedPath = absolutePath.split('/').map(item => encodeURIComponent(item)).join('/');
-
-  fs.readdir(fullPath, (err, files) => {
-
-    let detailedFiles = files.filter(name => !name.startsWith('.')).map(file => {
-      const lstatFile = fsUtils.validateUserForPath(path.join(absolutePath, file), token).path;
-
-      const stat = fs.lstatSync(lstatFile);
-      return {
-        name: file,
-        path: absolutePath,
-        escapedPath,
-        details: {
-          isFile: stat.isFile(),
-          isDirectory: stat.isDirectory(),
-          size: stat.size,
-          birthtime: stat.birthtimeMs
-        }
-      }
-    });
-
-    const numerOfPages = Math.ceil(detailedFiles.length / itemsPerPage);
-
-    if(numerOfPages >= 2)
-      detailedFiles = detailedFiles.slice((page-1) * itemsPerPage, (page-1) * itemsPerPage + itemsPerPage);
-
-    res.render('files',
-        {
-          title: 'Files viewer' ,
-          path: absolutePath,
-          files: detailedFiles,
-          parentDir,
-          username,
-          page,
-          itemsPerPage,
-          numerOfPages
-        });
-
-  })
-
-});
-
-
-
-router.post('/upload', function(req, res, next) {
-
-  console.log("Uploaded file ", req.files);
-
-  const validationResult = fsUtils.validateUserForPath(req.body.path, token);
-  const absolutePath = validationResult.path;
-
-  if(validationResult.readOnly) {
-    throw new Error("You don't have permissions to edit this shared folder.")
+  if (!fs.statSync(fullPath).isDirectory()) {
+    throw createError(400, 'Not a folder');
   }
 
-  const filesArray = Array.isArray(req.files.sampleFile) ? req.files.sampleFile: [req.files.sampleFile];
+  const page = Number(req.query.page) > 0 ? Math.floor(Number(req.query.page)) : 1;
+  const parentDir = relativePath.split('/').slice(0, -1).join('/');
+  const escapedPath = relativePath.split('/').map(item => encodeURIComponent(item)).join('/');
 
-  filesArray.map(file => {
-    if(file.name.includes('..')) {
-      throw new Error(`Invalid file name ${file.name}`);
-    }
+  const names = await fs.promises.readdir(fullPath);
 
-    const fullPath = path.join(absolutePath, file.name);
-    console.log("fullPath", fullPath);
-
-    file.mv(fullPath, function(err) {
-      if (err)
-        return res.status(500).send(err);
-    });
-
-  });
-
-  res.redirect(`/files?path=${req.body.path}`);
-
-});
-
-
-router.get('/get/:fileName', function(req, res, next) {
-  const absolutePath = path.join(req.query.path, req.params.fileName);
-  const filePath = fsUtils.validateUserForPath(absolutePath, token).path;
-  res.sendFile(filePath);
-
-});
-
-router.get('/get/preview/:fileName', function(req, res, next) {
-  const absolutePath = path.join(req.query.path, req.params.fileName);
-
-  const filePath = fsUtils.validateUserForPath(absolutePath, token).path;
-
-  // TODO make this as an option in GUI
-  sharp(filePath).resize(500).rotate().toBuffer().then(buff => {
-
-    res.end(buff, 'base64');
-
-  }).catch(error => {
-    res.json({error: error.toString()})
-  })
-
-});
-
-router.post('/delete', function(req, res, next) {
-
-  const fullPath = req.body.path;
-  const selectedItems = Object.keys(req.body).filter(item => item !== 'path');
-
-
-  for(let item of selectedItems) {
-    const absolutePath = path.join(fullPath, item);
-    const validationResult = fsUtils.validateUserForPath(absolutePath, token);
-
-    const filePath = validationResult.path;
-
-    if(validationResult.readOnly) {
-      throw new Error("You don't have permissions to edit this shared folder.")
-    }
-
-    console.error('removing file at path', absolutePath)
-
-    if(fs.lstatSync(filePath).isDirectory()) {
-      fs.rmdirSync(filePath);
-    } else if (fs.lstatSync(filePath).isFile()) {
-      fs.unlinkSync(filePath);
-    } else {
-      throw new Error(`Could not delete ${filePath}. Unknown target type!`)
-    }
-  }
-
-  res.redirect(`/files?path=${req.body.path}`);
-});
-
-router.get('/shared', function(req, res, next) {
-
-  const decodedToken = fsUtils.decodeToken(token);
-
-  const sharedFolders = decodedToken.shared.map(item => {
-
+  let detailedFiles = names.filter(name => !name.startsWith('.')).map(file => {
+    // lstat does not follow symlinks, so this cannot leave the user's folder.
+    const stat = fs.lstatSync(path.join(fullPath, file));
     return {
-      path: item.path,
-      owner: item.owner,
+      name: file,
+      path: relativePath,
+      escapedPath,
       details: {
-        isFile: false,
-        isDirectory: true,
+        isFile: stat.isFile(),
+        isDirectory: stat.isDirectory(),
+        size: stat.size,
+        birthtime: stat.birthtimeMs
       }
     };
-
-  })
-
-  res.render('shared', {
-    title: 'Shared folders' ,
-    folders: sharedFolders,
-    username: decodedToken.username
   });
 
+  const numerOfPages = Math.ceil(detailedFiles.length / itemsPerPage);
+
+  if (numerOfPages >= 2)
+    detailedFiles = detailedFiles.slice((page - 1) * itemsPerPage, (page - 1) * itemsPerPage + itemsPerPage);
+
+  res.render('files', {
+    title: 'Files viewer',
+    path: relativePath,
+    files: detailedFiles,
+    parentDir,
+    username,
+    page,
+    itemsPerPage,
+    numerOfPages
+  });
+});
+
+
+router.post('/upload', async function (req, res) {
+  const validationResult = fsUtils.validateUserForPath(req.body.path, res.locals.user);
+  const absolutePath = validationResult.path;
+
+  if (validationResult.readOnly) {
+    throw createError(403, "You don't have permissions to edit this shared folder.");
+  }
+
+  if (!req.files || !req.files.sampleFile) {
+    throw createError(400, 'No files were uploaded.');
+  }
+
+  const filesArray = Array.isArray(req.files.sampleFile) ? req.files.sampleFile : [req.files.sampleFile];
+
+  // Validate every name before writing anything.
+  const targets = filesArray.map(file => ({ file, name: fsUtils.safeName(path.basename(file.name)) }));
+
+  for (const { file, name } of targets) {
+    const fullPath = path.join(absolutePath, name);
+    console.log('Uploading file to', fullPath);
+    await file.mv(fullPath);
+  }
+
+  res.redirect(filesUrl(validationResult.relativePath));
+});
+
+
+function resolveFile(req, res) {
+  const relativePath = path.posix.join(fsUtils.normalizeRelative(req.query.path), fsUtils.safeName(req.params.fileName));
+  return fsUtils.validateUserForPath(relativePath, res.locals.user).path;
+}
+
+router.get('/get/:fileName', function (req, res) {
+  res.sendFile(resolveFile(req, res));
+});
+
+router.get('/get/preview/:fileName', async function (req, res) {
+  const filePath = resolveFile(req, res);
+
+  // TODO make this as an option in GUI
+  try {
+    const buff = await sharp(filePath).resize(500).rotate().toBuffer();
+    res.end(buff);
+  } catch (error) {
+    res.status(415).json({ error: 'Preview not available' });
+  }
+});
+
+router.post('/delete', function (req, res) {
+  const parent = fsUtils.normalizeRelative(req.body.path);
+  const selectedItems = Object.keys(req.body).filter(item => item !== 'path');
+
+  for (const item of selectedItems) {
+    const validationResult = fsUtils.validateUserForPath(path.posix.join(parent, fsUtils.safeName(item)), res.locals.user);
+    const filePath = validationResult.path;
+
+    if (validationResult.readOnly) {
+      throw createError(403, "You don't have permissions to edit this shared folder.");
+    }
+
+    console.log('removing file at path', filePath);
+
+    const stat = fs.lstatSync(filePath);
+    if (stat.isDirectory()) {
+      fs.rmdirSync(filePath);
+    } else if (stat.isFile()) {
+      fs.unlinkSync(filePath);
+    } else {
+      throw createError(400, `Could not delete ${item}. Unknown target type!`);
+    }
+  }
+
+  res.redirect(filesUrl(parent));
+});
+
+router.get('/shared', function (req, res) {
+  const user = res.locals.user;
+
+  const sharedFolders = (user.shared || []).map(item => ({
+    path: item.path,
+    owner: item.owner,
+    details: {
+      isFile: false,
+      isDirectory: true,
+    }
+  }));
+
+  res.render('shared', {
+    title: 'Shared folders',
+    folders: sharedFolders,
+    username: user.username
+  });
 });
 
 module.exports = router;

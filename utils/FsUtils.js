@@ -1,60 +1,95 @@
 const fs = require('fs');
-const config = require('../conf/config.json');
-const jwt = require('jsonwebtoken');
 const path = require('path');
+const createError = require('http-errors');
+const jwt = require('jsonwebtoken');
+const config = require('../conf/config.json');
 
-module.exports.filesRoot = config.filesRoot;
+const filesRoot = path.resolve(config.filesRoot);
+module.exports.filesRoot = filesRoot;
 
-function stripPath(relativePath, username) {
+// Normalises a user-supplied relative path ("/owner/dir/...") to a canonical
+// POSIX form without any "." or ".." segments.
+function normalizeRelative(relativePath) {
+    if (typeof relativePath !== 'string' || relativePath.includes('\0')) {
+        throw createError(400, 'Invalid path');
+    }
+    return path.posix.normalize('/' + relativePath).replace(/\/+$/, '') || '/';
+}
+module.exports.normalizeRelative = normalizeRelative;
 
-    const allowedUserPath = path.join(config.filesRoot, username);
-    const absolutePath = path.join(config.filesRoot, relativePath);
-    const realPath = fs.realpathSync(absolutePath);
+function isInside(child, parent) {
+    return child === parent || child.startsWith(parent + path.sep);
+}
 
-    if(absolutePath.startsWith(allowedUserPath)) {
-        console.log(`path ${absolutePath} is valid for ${username}`);
-        return absolutePath;
-    } else {
-        throw new Error(`Resolved path ${realPath} in invalid!`);
+// Resolves a relative path to an absolute path inside the owner's folder.
+// Throws 403 if it escapes the folder (including via symlinks) and 404 if it
+// does not exist (unless allowMissing is set, used for new folders).
+function stripPath(relativePath, owner, { allowMissing = false } = {}) {
+    const rel = normalizeRelative(relativePath);
+    const allowedUserPath = path.join(filesRoot, owner);
+    const absolutePath = path.join(filesRoot, rel);
+
+    if (!owner || owner.includes('/') || owner.includes('..') || !isInside(absolutePath, allowedUserPath)) {
+        throw createError(403, 'Access denied');
     }
 
+    let realPath;
+    try {
+        realPath = fs.realpathSync(absolutePath);
+    } catch (e) {
+        if (allowMissing && e.code === 'ENOENT') {
+            return absolutePath;
+        }
+        throw createError(404, 'Not found');
+    }
+
+    if (!isInside(realPath, fs.realpathSync(allowedUserPath))) {
+        throw createError(403, 'Access denied');
+    }
+    return absolutePath;
 }
 module.exports.stripPath = stripPath;
 
-module.exports.validateUserForPath = (relativePath, jwtToken) => {
+module.exports.decodeToken = (jwtToken) => jwt.verify(jwtToken, config.jwt.secret);
 
-    if(!jwtToken) {
-        throw new Error('You are not logged in!');
+// Works out who owns relativePath for the logged-in user (own folder or a
+// folder shared with them) and returns the absolute path plus permissions.
+module.exports.validateUserForPath = (relativePath, decoded, options) => {
+    if (!decoded) {
+        throw createError(401, 'You are not logged in!');
     }
-    // validate token
-    const decoded = jwt.verify(jwtToken, config.jwt.secret);
+    const rel = normalizeRelative(relativePath);
 
-    const shared = decoded.shared.filter(item => relativePath.startsWith(item.path));
+    const shared = (decoded.shared || []).filter(item => rel === item.path || rel.startsWith(item.path + '/'));
 
-    if(shared.length > 1) {
-        throw new Error("Invalid sharing configuration, found duplicate!")
+    if (shared.length > 1) {
+        throw createError(500, 'Invalid sharing configuration, found duplicate!');
     }
 
-    if(shared.length === 1) {
+    if (shared.length === 1) {
         return {
-            path: stripPath(relativePath, shared[0].owner),
+            path: stripPath(rel, shared[0].owner, options),
+            relativePath: rel,
             username: decoded.username,
             readOnly: shared[0].readOnly
-        }
-    } else {
-        return {
-            path: stripPath(relativePath, decoded.username),
-            username: decoded.username,
-            readOnly: false
-        }
+        };
     }
-
-
+    return {
+        path: stripPath(rel, decoded.username, options),
+        relativePath: rel,
+        username: decoded.username,
+        readOnly: false
+    };
 };
 
-module.exports.decodeToken = (jwtToken) => {
-    const decoded = jwt.verify(jwtToken, config.jwt.secret);
-    return decoded;
+// A single path segment chosen by the user (file or folder name).
+module.exports.safeName = (name) => {
+    if (typeof name !== 'string') {
+        throw createError(400, 'Invalid name');
+    }
+    const trimmed = name.trim();
+    if (!trimmed || trimmed === '.' || trimmed === '..' || /[\/\\\0]/.test(trimmed)) {
+        throw createError(400, `Invalid name ${name}`);
+    }
+    return trimmed;
 };
-
-
